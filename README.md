@@ -1,0 +1,3 @@
+# CodecardS Project:
+
+Intilial stage
