@@ -1,0 +1,154 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #F0FDF4;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Navbar styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50;
+  cursor: pointer;
+}
+
+.navbar-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.navbar-button {
+  background-color: #d1f1d1;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+}
+
+.navbar-button:hover {
+  background-color: #c1e8c1;
+}
+
+/* Hero section */
+.hero-section {
+  text-align: left;
+  margin: 20px 40px;
+}
+
+.hero-section h1 {
+  font-size: 36px;
+  color: #4CAF50;
+  font-weight: normal;
+}
+
+/* Cards grid layout */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 20px;
+  padding: 0 40px 40px;
+  width: 100%;
+  max-width: 1500px;
+  margin: auto;
+  box-sizing: border-box;
+}
+
+
+/* Individual card styles */
+.topic-card {
+  background-color: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  transition: all 0.3s ease-in-out;
+}
+
+
+.topic-card h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+.topic-card p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* Button styles */
+.card-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.preview-button, .start-button {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  text-align: center;
+}
+
+.preview-button:hover, .start-button:hover {
+  background-color: #45a049;
+}
+
+/* ---- RESPONSIVE DESIGN ---- */
+
+
+@media (max-width: 1450px) {
+  .cards-container {
+  grid-template-columns: repeat(3, 1fr); 
+  padding: 0 30px 30px;
+   }
+  }
+@media (max-width: 1024px) {
+  .cards-container {
+      grid-template-columns: repeat(2, 1fr); /* 2 cards in a row for tablets */
+      padding: 0 20px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-container {
+      grid-template-columns: 1fr; /* 1 card per row for mobile */
+  }
+  
+  .navbar, .hero-section {
+      padding: 15px 20px;
+  }
+  
+  .hero-section h1 {
+    
+    font-size: clamp(24px, 4vw, 36px); /* Dynamically scale text */
+    color: #4CAF50;
+    font-weight: normal;
+    text-align: center;
+  }
+}

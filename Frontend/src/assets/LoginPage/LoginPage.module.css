@@ -1,0 +1,145 @@
+.container {
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: center;
+    background: #F0FDF4;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+
+.title {
+    color: #16A34A;
+    font-family: Inter, sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+.ImgContainer {
+    width: 50vw; /* Responsive width */
+    max-width: 400px; /* Avoid oversized images */
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px; /* Reduce excessive spacing */
+    margin-left: 0px;
+}
+
+.ImgContainer img {
+    width: 100%;
+    height: auto;
+}
+
+
+.signUp_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%; /* Increase width on smaller screens */
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 40px;
+    background-color: white;
+    margin: 20px auto;
+}
+
+
+.input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 1px solid #16A34A;
+}
+
+.buttons {
+    margin-top: 10px;
+    width: 100%;
+    max-width: 350px;
+}
+
+/* Responsive button styles */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.forgotPassword, .switchForm {
+    color: #4CAF50;
+    cursor: pointer;
+    margin-top: 15px;
+    text-align: center;
+  }
+  
+  .forgotPassword:hover, .switchForm:hover {
+    text-decoration: underline;
+  }
+  
+  .errorMessage {
+    color: #f44336;
+    margin: 10px 0;
+    text-align: center;
+    font-size: 14px;
+  }
+
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column; 
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .ImgContainer {
+        width: 80%; 
+        max-width: 300px;
+    }
+
+    .signUp_container {
+        width: 90%;
+        max-width: 350px;
+        margin: 10px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 28px; 
+    }
+
+    .signUp_container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .ImgContainer {
+        width: 70%;
+        max-width: 250px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
