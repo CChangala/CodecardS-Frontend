@@ -97,7 +97,7 @@ function LoginPage() {
             if (user.response === "Login Successful") {
                 console.log("Logged in");
                 setIsAuthenticated(true);
-                navigate('/');
+                navigate('/', { state: { userId: user.userId } });
             } else {
                 setError("Unable to login - Invalid email or password!");
             }

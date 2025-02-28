@@ -1,12 +1,15 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
+import { useLocation } from "react-router-dom";
 import "./MainPage.css";
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
 
 function MainPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { userId } = location.state || {};
   const { isAuthenticated } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
 
