@@ -131,6 +131,7 @@ function LoginPage() {
             }
         }
     };
+    //checking if the user is already logged in
 
     return (
         <div className={styles.container}>
@@ -202,7 +203,7 @@ function LoginPage() {
                             {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
                         </p>
                     )}
-
+                    
                     {isLogin && (
                         <p className={styles.forgotPassword} onClick={() => setIsForgotPassword(true)}>
                             Forgot Password?
