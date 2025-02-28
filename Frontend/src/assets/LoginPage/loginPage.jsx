@@ -5,6 +5,37 @@ import styles from './LoginPage.module.css';
 import login from '../../images/login.png';
 import validator from "validator";
 
+const LoginCall = async (email, password) => {
+    const response = await fetch('http://localhost:8080/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    });
+    return await response.json();
+    };
+
+const SignUpCall = async (email, password, confrimPassword) => {
+        const response = await fetch('http://localhost:8080/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password, confrimPassword }),
+        });
+        if (!response.ok) {
+            // If the response status is not OK (e.g., 406), throw an error with the status
+            const error = await response.json();
+            throw new Error(error.error || response.statusText);
+        }
+    
+        const data = await response.text();
+        return data;
+
+        };
+    
+
 function LoginPage() {
     const navigate = useNavigate();
     const { setIsAuthenticated } = useContext(AuthContext);
@@ -20,10 +51,9 @@ function LoginPage() {
         return validator.isEmail(email); 
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async() => {
         setError("");
         setSuccessMessage("");
-        let users = JSON.parse(localStorage.getItem("users")) || [];
 
         if (!email) {
             setError("Email cannot be empty.");
@@ -35,6 +65,7 @@ function LoginPage() {
             return;
         }
 
+        //can do it later.
         if (isForgotPassword) {
             // Handle Forgot Password
             const userIndex = users.findIndex(user => user.email === email);
@@ -42,10 +73,6 @@ function LoginPage() {
                 setError("Email not found.");
                 return;
             }
-
-            
-        
-
             if (!password || !confirmPassword) {
                 setError("Please enter and confirm your new password.");
                 return;
@@ -65,12 +92,14 @@ function LoginPage() {
 
         if (isLogin) {
             // Login validation
-            const user = users.find(user => user.email === email && user.password === password);
-            if (user) {
+            const user = await LoginCall(email,password);
+            console.log(user);
+            if (user.response === "Login Successful") {
+                console.log("Logged in");
                 setIsAuthenticated(true);
                 navigate('/');
             } else {
-                setError("Invalid email or password!");
+                setError("Unable to login - Invalid email or password!");
             }
         } else {
             // Signup validation
@@ -84,15 +113,22 @@ function LoginPage() {
                 return;
             }
 
-            if (users.find(user => user.email === email)) {
-                setError("Email already registered. Please log in.");
-                return;
+            try {
+                const response = await SignUpCall(email, password, confirmPassword);
+                setIsLogin(true);
+                setSuccessMessage("Signup successful! Please log in.");
+                setEmail("");
+                setPassword("");
+            } catch (error) {
+                if (error.message === "Not Acceptable") {
+                    setError("Email already exists. Use a different email to Sign Up!");
+                    setEmail("");
+                    setPassword("");
+                    setConfirmPassword("");
+                } else {
+                    setError("An error occurred during signup. Please try again.");
+                }
             }
-
-            users.push({ email, password });
-            localStorage.setItem("users", JSON.stringify(users));
-            setIsLogin(true);
-            setSuccessMessage("Signup successful! Please log in.");
         }
     };
 
