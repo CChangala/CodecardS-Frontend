@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import LoginPage from './assets/LoginPage/LoginPage.jsx'
 import MainPage from './assets/MainPage/MainPage.jsx'
+import CoursePage from './assets/CoursePage/CoursePage.jsx'
+
 
 export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
@@ -13,6 +15,7 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('isAuthenticated', isAuthenticated);
+    
   }, [isAuthenticated]);
 
   return (
@@ -46,6 +49,7 @@ createRoot(document.getElementById('root')).render(
         
           <Route path="/topics" element={<MainPage />} />
           <Route path="/home" element={<Navigate to="/" />} />
+          <Route path="/course/:id" element={<ProtectedRoute><CoursePage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
