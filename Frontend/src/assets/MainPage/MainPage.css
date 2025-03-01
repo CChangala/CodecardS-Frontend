@@ -1,11 +1,15 @@
 body{
   background-color:#F0FDF4 ;
 }
+body{
+  background-color:#F0FDF4 ;
+}
 .main-container {
   display: flex;
   flex-direction: column;
   background-color: #F0FDF4;
   min-height: 100vh;
+  max-width: 100vw;
   max-width: 100vw;
   width: 100%;
   margin: 0;
@@ -20,10 +24,12 @@ body{
   justify-content: space-between;
   align-items: center;
   padding:  1rem 5%;
+  padding:  1rem 5%;
   box-sizing: border-box;
 }
 
 .navbar-logo {
+  font-size: 1.5rem;
   font-size: 1.5rem;
   font-weight: bold;
   color: #4CAF50;
@@ -39,7 +45,9 @@ body{
   background-color: #d1f1d1;
   border: none;
   padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 20px;
+  font-size: 1rem;
   font-size: 1rem;
   cursor: pointer;
   color: #333;
@@ -52,7 +60,9 @@ body{
 /* Hero section */
 .hero-section {
   text-align: center;
+  text-align: center;
   margin: 20px 40px;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   color: #4CAF50;
   font-weight: normal;
@@ -65,15 +75,21 @@ body{
     gap: 20px;
     padding: 1rem 3%;
     align-items: stretch;
+    grid-template-columns: repeat(4, minmax(250px,1fr));
+    gap: 20px;
+    padding: 1rem 3%;
+    align-items: stretch;
 }
 
 .topic-card {
   background-color: white;
   border-radius: 15px;
   padding: 1rem;
+  padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   justify-content: space-between;
   min-height: 180px;
   transition: all 0.3s ease-in-out;
@@ -82,11 +98,14 @@ body{
 .topic-card h2 {
   margin-bottom: 0.5rem;
   font-size: clamp(1rem, 2.5vw, 1.25rem); /* Responsive font size */
+  margin-bottom: 0.5rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem); /* Responsive font size */
   color: #333;
 }
 
 .topic-card p {
   color: #666;
+  margin-bottom: 0.75rem; /* Optimized margin */
   margin-bottom: 0.75rem; /* Optimized margin */
 }
 
@@ -94,10 +113,15 @@ body{
   display: flex;
   gap: 10px;
   flex-direction: row; /* Change to row layout for buttons */
+  gap: 10px;
+  flex-direction: row; /* Change to row layout for buttons */
 }
 
 .preview-button, .start-button {
   flex: 1;
+  padding: 0.75rem;
+  border-radius: 20px;
+  font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
   padding: 0.75rem;
   border-radius: 20px;
   font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
@@ -111,7 +135,9 @@ body{
 }
 
 @media (max-width: 1200px) {
+@media (max-width: 1200px) {
   .cards-container {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
   }
 }
