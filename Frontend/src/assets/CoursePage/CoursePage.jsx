@@ -7,70 +7,17 @@ import { topics } from "../MainPage/MainPage.jsx";
 import "./CoursePage.css";
 import LinkIcon from "../../images/LinkIcon.svg";
 
-export const courses = {
-  1: { 
-    title: "Python", 
-    subtopics: [
-      { name: "Basics", link: "https://www.geeksforgeeks.org/introduction-to-python/" },
-      { name: "Libraries", link: "https://www.geeksforgeeks.org/python-packages/" },
-      { name: "Numpy", link: "https://www.geeksforgeeks.org/python-numpy/" },
-      { name: "Pandas", link: "https://www.geeksforgeeks.org/python-pandas-dataframe/" },
-      { name: "Sci-kit Learn", link: "https://www.geeksforgeeks.org/learning-model-building-scikit-learn-python-machine-learning-library/" },
-      { name: "Matplotlib", link: "https://www.geeksforgeeks.org/python-introduction-matplotlib/" },
-      { name: "Seaborn", link: "https://www.geeksforgeeks.org/python-seaborn-tutorial/" },
-      { name: "Keras", link: "https://www.geeksforgeeks.org/python-keras/" }
-    ]
-  },
-  2: { 
-    title: "Java", 
-    subtopics: [
-      { name: "OOP Basics", link: "https://docs.oracle.com/javase/tutorial/java/concepts/index.html" },
-      { name: "Collections Framework", link: "https://docs.oracle.com/javase/tutorial/collections/index.html" }
-    ]
-  },
-  3: { 
-    title: "DSA", 
-    subtopics: [
-      { name: "Sorting Algorithms", link: "https://www.geeksforgeeks.org/sorting-algorithms/" },
-      { name: "Graph Algorithms", link: "https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/" }
-    ]
-  },
-  4: { 
-    title: "HTML/CSS", 
-    subtopics: [
-      { name: "HTML Basics", link: "https://www.w3schools.com/html/default.asp" },
-      { name: "CSS Fundamentals", link: "https://www.w3schools.com/css/default.asp" }
-    ]
-  },
-  5: { 
-    title: "JavaScript", 
-    subtopics: [
-      { name: "JS Basics", link: "https://www.w3schools.com/js/default.asp" },
-      { name: "DOM Manipulation", link: "https://www.w3schools.com/js/js_htmldom.asp" }
-    ]
-  },
-  6: { 
-    title: "React", 
-    subtopics: [
-      { name: "React Basics", link: "https://reactjs.org/tutorial/tutorial.html" },
-      { name: "Hooks", link: "https://reactjs.org/docs/hooks-intro.html" }
-    ]
-  },
-  7: { 
-    title: "Machine Learning", 
-    subtopics: [
-      { name: "ML Basics", link: "https://www.kaggle.com/learn/intro-to-machine-learning" },
-      { name: "Neural Networks", link: "https://www.kaggle.com/learn/deep-learning" }
-    ]
-  },
-  8: { 
-    title: "SQL", 
-    subtopics: [
-      { name: "SQL Basics", link: "https://www.w3schools.com/sql/default.asp" },
-      { name: "Advanced Queries", link: "https://www.w3schools.com/sql/sql_join.asp" }
-    ]
+export const courses = null;
+
+const getTopics = async(courseId)=>{
+  const response = await fetch(`http://localhost:8080/topic/${courseId}`)
+  if(!response.ok){
+    const error = await response.json();
+    throw new Error(error.error ||response.statusText);
   }
-};
+    const data = await response.json();
+    return data;
+}
 
 function CoursePage() {
   const { id } = useParams();
@@ -81,33 +28,48 @@ function CoursePage() {
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showNotesPopup, setShowNotesPopup] = useState(false);
-  const course = courses[id];
+  const [course, setCourse] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
+
   
-  const currentTopic = topics.find(topic => topic.id === parseInt(id));
+  const currentTopic = "Java";
 
   useEffect(() => {
-    const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
-    setProgress(savedProgress[course.title] || {});
-    const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
-    setNotes(savedNotes[course.title] || {});
-  }, [id, username, course.title]);
+    async function fetchData() {
+      try{
+        const course = await getTopics(id);
+        setCourse(course);
+      }
+      catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+      const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
+      setProgress(savedProgress[course.title] || {});
+      const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
+      setNotes(savedNotes[course.title] || {});
+    }
+    fetchData();
+  }, []);
 
   const handleCheckboxChange = (subtopic) => {
-    const updatedProgress = { ...progress, [subtopic]: !progress[subtopic] };
+    /**const updatedProgress = { ...progress, [subtopic]: !progress[subtopic] };
     setProgress(updatedProgress);
     
     const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
     savedProgress[course.title] = updatedProgress;
-    localStorage.setItem(username, JSON.stringify(savedProgress));
+    localStorage.setItem(username, JSON.stringify(savedProgress));**/
   };
 
   const handleFlashcardClick = (subtopic) => {
-    if (isAuthenticated) {
+   /** if (isAuthenticated) {
       navigate(`/flashcards/${id}/${subtopic.name}`);  // Use just the name property
     } else {
       navigate("/login");
-    }
+    }**/
   };
 
   const handleNotesClick = (subtopic) => {
@@ -118,21 +80,24 @@ function CoursePage() {
   };
 
   const handleSaveNotes = (newNote) => {
-    const updatedNotes = { ...notes, [activeSubtopic]: newNote };
+    /**const updatedNotes = { ...notes, [activeSubtopic]: newNote };
     setNotes(updatedNotes);
     
     const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
     savedNotes[course.title] = updatedNotes;
     localStorage.setItem(`${username}-notes`, JSON.stringify(savedNotes));
 
-    setShowNotesPopup(false);
+    setShowNotesPopup(false);**/
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   if (!course) return <p>Loading...</p>;
 
-  const completedCount = Object.values(progress).filter(Boolean).length;
-  const totalCount = course.subtopics.length;
-  const completionRate = (completedCount / totalCount) * 100;
+  //const completedCount = Object.values(progress).filter(Boolean).length;
+  //const totalCount = course.subtopics.length;
+  const completionRate = 0;
 
   return (
     <div className="course-page-container">
@@ -142,7 +107,7 @@ function CoursePage() {
           <Link to="/topics">← Back</Link>
         </div>
         
-        <h1>{course.title}</h1>
+        <h1>{"Java"}</h1>
         <div className="progress-section">
           <ProgressBar progress={completionRate} />
           <span className="progress-text">{Math.round(completionRate)}%</span>
@@ -164,14 +129,14 @@ function CoursePage() {
             </tr>
           </thead>
           <tbody>
-            {course.subtopics.map((sub) => (
-              <tr key={sub.name} className="course-cells">
+            {course[0].topic.map((sub) => (
+              <tr key={sub.topicId} className="course-cells">
                 <td className="status-cell">
                   <label className="checkbox-container">
                     <input
                       type="checkbox"
-                      checked={progress[sub.name] || false}
-                      onChange={() => handleCheckboxChange(sub.name)}
+                      checked={progress[sub.topicId] || false}
+                      onChange={() => handleCheckboxChange(sub.topicId)}
                     />
                     <span className="checkmark"></span>
                   </label>
