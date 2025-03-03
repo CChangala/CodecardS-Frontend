@@ -7,7 +7,7 @@ import validator from "validator";
 
 function LoginPage() {
     const navigate = useNavigate();
-    const { setIsAuthenticated } = useContext(AuthContext);
+    const { setIsAuthenticated, setUsername } = useContext(AuthContext);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -67,6 +67,8 @@ function LoginPage() {
             // Login validation
             const user = users.find(user => user.email === email && user.password === password);
             if (user) {
+                setUsername(email);
+                setIsAuthenticated(true);
                 setIsAuthenticated(true);
                 navigate('/');
             } else {

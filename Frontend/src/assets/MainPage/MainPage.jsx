@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import "./MainPage.css";
@@ -65,8 +65,16 @@ export const topics = [
 ];
 function MainPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, username } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [startedCourses, setStartedCourses] = useState({});
+
+  useEffect(() => {
+    if (isAuthenticated && username) {
+      const savedStartedCourses = JSON.parse(localStorage.getItem(`${username}-started-courses`)) || {};
+      setStartedCourses(savedStartedCourses);
+    }
+  }, [isAuthenticated, username]);
 
   
 
@@ -77,6 +85,23 @@ function MainPage() {
       setSelectedTopic(topic);
     }
   };
+
+  const handleCourseStart = (topicId) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    } else {
+      // Mark the course as started
+      const updatedStartedCourses = { ...startedCourses, [topicId]: true };
+      setStartedCourses(updatedStartedCourses);
+      
+      // Save to localStorage
+      localStorage.setItem(`${username}-started-courses`, JSON.stringify(updatedStartedCourses));
+      
+      // Navigate to the course page
+      navigate(`/course/${topicId}`);
+    }
+  };
+
 
   return (
     <div className="main-container">
@@ -94,9 +119,12 @@ function MainPage() {
               <button className="preview-button" onClick={() => handlePreviewClick(topic)}>
                 Preview
               </button>
-              <button className="start-button" onClick={() => (!isAuthenticated ? navigate("/login") : navigate(`/course/${topic.id}`))}>
-  Start
-</button>
+              <button 
+                className={startedCourses[topic.id] ? "resume-button" : "start-button"}
+                onClick={() => handleCourseStart(topic.id)}
+              >
+                {startedCourses[topic.id] ? "Resume" : "Start"}
+              </button>
 
 
             </div>

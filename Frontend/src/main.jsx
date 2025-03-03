@@ -14,13 +14,22 @@ const AuthProvider = ({ children }) => {
     localStorage.getItem('isAuthenticated') === 'true'
   );
 
+  const [username, setUsername] = useState(
+    localStorage.getItem('username') || ''
+  );
+
   useEffect(() => {
     localStorage.setItem('isAuthenticated', isAuthenticated);
     
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    localStorage.setItem('username', username);
+  }, [username]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated,username, 
+      setUsername }}>
       {children}
     </AuthContext.Provider>
   );

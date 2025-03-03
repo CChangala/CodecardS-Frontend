@@ -96,7 +96,7 @@ body{
   flex-direction: row; /* Change to row layout for buttons */
 }
 
-.preview-button, .start-button {
+.preview-button, .start-button, .resume-button{
   flex: 1;
   padding: 0.75rem;
   border-radius: 20px;
@@ -106,7 +106,7 @@ body{
   text-align: center;
 }
 
-.preview-button:hover, .start-button:hover {
+.preview-button:hover, .start-button:hover, .resume-button:hover {
   background-color: #45a049;
 }
 
