@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
 import Navbar from "../NavBar/Navbar.jsx";
@@ -7,7 +7,7 @@ import { topics } from "../MainPage/MainPage.jsx";
 import "./CoursePage.css";
 import LinkIcon from "../../images/LinkIcon.svg";
 
-const courses = {
+export const courses = {
   1: { 
     title: "Python", 
     subtopics: [
@@ -76,14 +76,21 @@ function CoursePage() {
   const { id } = useParams();
   const { username } = useContext(AuthContext);
   const [progress, setProgress] = useState({});
+  const [notes, setNotes] = useState({});
+  const [activeSubtopic, setActiveSubtopic] = useState(null);
+  const { isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [showNotesPopup, setShowNotesPopup] = useState(false);
   const course = courses[id];
-  const [showNotes, setShowNotes] = useState({});
+  
   
   const currentTopic = topics.find(topic => topic.id === parseInt(id));
 
   useEffect(() => {
     const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
     setProgress(savedProgress[course.title] || {});
+    const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
+    setNotes(savedNotes[course.title] || {});
   }, [id, username, course.title]);
 
   const handleCheckboxChange = (subtopic) => {
@@ -96,15 +103,29 @@ function CoursePage() {
   };
 
   const handleFlashcardClick = (subtopic) => {
-    
-    console.log(`Flashcard for ${subtopic} clicked`);
-   
+    if (isAuthenticated) {
+      navigate(`/flashcards/${id}/${subtopic.name}`);  // Use just the name property
+    } else {
+      navigate("/login");
+    }
   };
 
   const handleNotesClick = (subtopic) => {
     
-    console.log(`Notes for ${subtopic} clicked`);
+    setActiveSubtopic(subtopic);
+    setShowNotesPopup(true);
     
+  };
+
+  const handleSaveNotes = (newNote) => {
+    const updatedNotes = { ...notes, [activeSubtopic]: newNote };
+    setNotes(updatedNotes);
+    
+    const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
+    savedNotes[course.title] = updatedNotes;
+    localStorage.setItem(`${username}-notes`, JSON.stringify(savedNotes));
+
+    setShowNotesPopup(false);
   };
 
   if (!course) return <p>Loading...</p>;
@@ -160,11 +181,10 @@ function CoursePage() {
                   <a href={sub.link} target="_blank" rel="noopener noreferrer"><img src={LinkIcon} alt="link" className="link-icon" width="30" height="30"/></a> 
                 </td>
                 <td className="flashcard-cell">
-                  <button 
-                    className="flashcard-button" 
-                    onClick={() => handleFlashcardClick(sub.name)}
-                    aria-label={`Flashcards for ${sub.name}`}
-                  ></button>
+                <button 
+  className="flashcard-button" 
+  onClick={() => handleFlashcardClick(sub)}  // Make sure "sub" is the subtopic object
+></button>
                 </td>
                 <td className="notes-cell">
                   <button 
@@ -177,9 +197,40 @@ function CoursePage() {
             ))}
           </tbody>
         </table>
+
       </div>
+      {showNotesPopup && (
+        <NotesPopup 
+          subtopic={activeSubtopic} 
+          notes={notes[activeSubtopic] || ""} 
+          onClose={() => setShowNotesPopup(false)}
+          onSave={handleSaveNotes} 
+        />
+      )}
     </div>
   );
 }
+
+function NotesPopup({ subtopic, notes, onClose, onSave }) {
+    const [newNote, setNewNote] = useState(notes);
+  
+    return (
+      <div className="notes-overlay">
+        <div className="notes-box">
+          <button onClick={onClose} className="close-button">x</button>
+          <h2>Notes</h2>
+          <textarea 
+            value={newNote} 
+            onChange={(e) => setNewNote(e.target.value)} 
+            placeholder="Write your notes here..."
+          />
+          <div className="notes-buttons">
+            <button className="save-button" onClick={() => onSave(newNote)}>Save</button>
+            <button className="close-button" onClick={onClose}>x</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
 export default CoursePage;
