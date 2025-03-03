@@ -5,6 +5,7 @@ import './index.css'
 import LoginPage from './assets/LoginPage/LoginPage.jsx'
 import MainPage from './assets/MainPage/MainPage.jsx'
 import CoursePage from './assets/CoursePage/CoursePage.jsx'
+import FlashcardPage from './assets/FlashcardPage/FlashcardPage.jsx';
 
 
 export const AuthContext = createContext();
@@ -50,6 +51,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/topics" element={<MainPage />} />
           <Route path="/home" element={<Navigate to="/" />} />
           <Route path="/course/:id" element={<ProtectedRoute><CoursePage /></ProtectedRoute>} />
+          <Route path="/flashcards/:subject/:topic" element={<ProtectedRoute><FlashcardPage /></ProtectedRoute>} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>

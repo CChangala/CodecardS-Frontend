@@ -274,6 +274,7 @@
   
   /* Notes button - Just the plus sign */
   .notes-button {
+    background: transparent;
     width: 24px;
     height: 24px;
     background-color: transparent;
@@ -284,7 +285,16 @@
     cursor: pointer;
     transition: color 0.2s ease;
     display: inline-block;
+    
+    
   }
+  
+  
+  .notes-button:hover {
+    color: darkgreen;
+    background: none; /* Ensuring no background on hover */
+  }
+  
   
   .notes-button:hover {
     color: #4CAF50;
@@ -550,3 +560,83 @@
       max-width: 200px;
     }
   }
+
+  .notes-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .notes-box {
+    background: white;
+    padding: 20px;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    text-align: center;
+  }
+  
+  .notes-box h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .notes-box textarea {
+    width: 100%;
+    height: 150px;
+    
+    border: 1px;
+    border-radius: 5px;
+    resize: none;
+    font-size: 16px;
+    background-color: white;  /* Set background to white */
+    color: black;  /* Set text color to black */
+    
+  }
+  
+  .notes-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .save-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .close-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .notes-button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #4CAF50;
+    cursor: pointer;
+  }
+  
+  .notes-button:hover {
+    color: darkgreen;
+  }
+  
