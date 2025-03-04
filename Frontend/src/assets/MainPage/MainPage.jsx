@@ -1,10 +1,15 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
-import "./MainPage.css";
+import ProgressBar from "../ProgressBar/ProgressBar.jsx";
+ 
+
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
-import ProgressBar from "../ProgressBar/ProgressBar.jsx";
+import "./MainPage.css";
+
+  
+
 import Footer from "../Footer/Footer.jsx";
 
 export const topics = [
@@ -65,6 +70,19 @@ export const topics = [
     benefits: "You will master querying, data manipulation, and database management."
   }
 ];
+function MainPageProgressBar({ progress }) {
+  return (
+    <div className="mainpage-progress-bar">
+      <div 
+        className="mainpage-progress" 
+        style={{ width: `${progress}%` }}
+      >
+        <span>{progress}%</span>
+      </div>
+    </div>
+  );
+}
+
 function MainPage() {
   const navigate = useNavigate();
   const { isAuthenticated, username } = useContext(AuthContext);
@@ -149,7 +167,7 @@ function MainPage() {
             </div>
             {startedCourses[topic.id] && (
               <div className="progress-container">
-              <ProgressBar progress={startedCourses[topic.id]?.progress || 0} />
+              <MainPageProgressBar progress={startedCourses[topic.id]?.progress || 0} />
             </div>
             )}
           
