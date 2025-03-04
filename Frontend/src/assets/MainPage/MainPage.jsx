@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
  
@@ -70,37 +71,38 @@ export const topics = [
     benefits: "You will master querying, data manipulation, and database management."
   }
 ];
-function MainPageProgressBar({ progress }) {
-  return (
-    <div className="mainpage-progress-bar">
-      <div 
-        className="mainpage-progress" 
-        style={{ width: `${progress}%` }}
-      >
-        <span>{progress}%</span>
-      </div>
-    </div>
-  );
-}
+
+const getCourses = async()=>{
+  const response = await fetch("http://localhost:8080/courses");
+  if (!response.ok) { 
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  const data = await response.json();
+  return data;
+};
 
 function MainPage() {
   const navigate = useNavigate();
   const { isAuthenticated, username } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  
-
-  const [startedCourses, setStartedCourses] = useState({
-    1: { progress: 25, started: true },  
-    2: { progress: 50, started: true },  
-    3: { progress: 75, started: true },  
-    4: { progress: 0, started: false },  
-    5: { progress: 10, started: true },   
-    6: { progress: 40, started: true },   
-    7: { progress: 5, started: true },    
-    8: { progress: 0, started: false }    
-  });
+  const [startedCourses, setStartedCourses] = useState({});
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const topics = await getCourses();
+        setTopics(topics);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopics();
     if (isAuthenticated && username) {
       const savedStartedCourses = JSON.parse(localStorage.getItem(`${username}-started-courses`)) || {};
       setStartedCourses(savedStartedCourses);
@@ -138,6 +140,14 @@ function MainPage() {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
 
   return (
     <>
@@ -165,6 +175,7 @@ function MainPage() {
 
               
             </div>
+            {startedCourses[topic.id] && (
             {startedCourses[topic.id] && (
               <div className="progress-container">
               <MainPageProgressBar progress={startedCourses[topic.id]?.progress || 0} />
