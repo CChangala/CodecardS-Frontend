@@ -6,6 +6,7 @@ import Navbar from "../NavBar/Navbar.jsx";
 import { topics } from "../MainPage/MainPage.jsx"; 
 import "./CoursePage.css";
 import LinkIcon from "../../images/LinkIcon.svg";
+import Footer from "../Footer/Footer.jsx";
 
 export const courses = {
   1: { 
@@ -104,7 +105,7 @@ function CoursePage() {
 
   const handleFlashcardClick = (subtopic) => {
     if (isAuthenticated) {
-      navigate(`/flashcards/${id}/${subtopic.name}`);  // Use just the name property
+      navigate(`/flashcards/${id}/${subtopic.name}`);  
     } else {
       navigate("/login");
     }
@@ -135,6 +136,7 @@ function CoursePage() {
   const completionRate = (completedCount / totalCount) * 100;
 
   return (
+    <>
     <div className="course-page-container">
       <Navbar />
       <div className="course-content">
@@ -183,7 +185,7 @@ function CoursePage() {
                 <td className="flashcard-cell">
                 <button 
   className="flashcard-button" 
-  onClick={() => handleFlashcardClick(sub)}  // Make sure "sub" is the subtopic object
+  onClick={() => handleFlashcardClick(sub)}  
 ></button>
                 </td>
                 <td className="notes-cell">
@@ -197,7 +199,7 @@ function CoursePage() {
             ))}
           </tbody>
         </table>
-
+      
       </div>
       {showNotesPopup && (
         <NotesPopup 
@@ -208,6 +210,8 @@ function CoursePage() {
         />
       )}
     </div>
+    <Footer/>
+    </>
   );
 }
 

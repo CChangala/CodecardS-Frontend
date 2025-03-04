@@ -4,6 +4,7 @@ import { AuthContext } from '../../main.jsx';
 import styles from './LoginPage.module.css';
 import login from '../../images/login.png';
 import validator from "validator";
+import Footer from "../Footer/Footer.jsx";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -99,6 +100,7 @@ function LoginPage() {
     };
 
     return (
+        <>
         <div className={styles.container}>
             <div className={styles.ImgContainer}>
                 <img src={login} alt="studying girl"/>
@@ -183,6 +185,8 @@ function LoginPage() {
                 </div>
             </div>
         </div>
+        <Footer />
+        </>
     );
 }
 

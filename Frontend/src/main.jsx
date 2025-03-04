@@ -8,6 +8,7 @@ import CoursePage from './assets/CoursePage/CoursePage.jsx'
 import FlashcardPage from './assets/FlashcardPage/FlashcardPage.jsx';
 
 
+
 export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(

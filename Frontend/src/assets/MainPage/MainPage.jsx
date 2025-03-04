@@ -4,6 +4,8 @@ import { AuthContext } from "../../main.jsx";
 import "./MainPage.css";
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
+import ProgressBar from "../ProgressBar/ProgressBar.jsx";
+import Footer from "../Footer/Footer.jsx";
 
 export const topics = [
   {
@@ -67,7 +69,18 @@ function MainPage() {
   const navigate = useNavigate();
   const { isAuthenticated, username } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [startedCourses, setStartedCourses] = useState({});
+  
+
+  const [startedCourses, setStartedCourses] = useState({
+    1: { progress: 25, started: true },  
+    2: { progress: 50, started: true },  
+    3: { progress: 75, started: true },  
+    4: { progress: 0, started: false },  
+    5: { progress: 10, started: true },   
+    6: { progress: 40, started: true },   
+    7: { progress: 5, started: true },    
+    8: { progress: 0, started: false }    
+  });
 
   useEffect(() => {
     if (isAuthenticated && username) {
@@ -76,7 +89,11 @@ function MainPage() {
     }
   }, [isAuthenticated, username]);
 
-  
+  useEffect(() => {
+    if (isAuthenticated && username) {
+      localStorage.setItem(`${username}-started-courses`, JSON.stringify(startedCourses));
+    }
+  }, [startedCourses, isAuthenticated, username]);
 
   const handlePreviewClick = (topic) => {
     if (!isAuthenticated) {
@@ -90,20 +107,22 @@ function MainPage() {
     if (!isAuthenticated) {
       navigate("/login");
     } else {
-      // Mark the course as started
-      const updatedStartedCourses = { ...startedCourses, [topicId]: true };
-      setStartedCourses(updatedStartedCourses);
+      if (!startedCourses[topicId] || !startedCourses[topicId].started) {
+        const updatedStartedCourses = { 
+          ...startedCourses, 
+          [topicId]: { progress: 0, started: true } 
+        };
+        setStartedCourses(updatedStartedCourses);
+      }
       
-      // Save to localStorage
-      localStorage.setItem(`${username}-started-courses`, JSON.stringify(updatedStartedCourses));
       
-      // Navigate to the course page
       navigate(`/course/${topicId}`);
     }
   };
 
 
   return (
+    <>
     <div className="main-container">
       <Navbar />
       <div className="hero-section">
@@ -126,12 +145,20 @@ function MainPage() {
                 {startedCourses[topic.id] ? "Resume" : "Start"}
               </button>
 
-
+              
             </div>
+            {startedCourses[topic.id] && (
+              <div className="progress-container">
+              <ProgressBar progress={startedCourses[topic.id]?.progress || 0} />
+            </div>
+            )}
+          
           </div>
         ))}
+      
       </div>
-
+      
+      
       {selectedTopic && (
         <Preview
           title={selectedTopic.title}
@@ -142,6 +169,9 @@ function MainPage() {
         />
       )}
     </div>
+    <Footer/>
+    </>
+    
   );
 }
 

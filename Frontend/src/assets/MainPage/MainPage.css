@@ -12,6 +12,7 @@ body{
   padding: 0;
   overflow-x: hidden;
   box-sizing: border-box;
+  padding-bottom: 100px;
 }
 
 /* Navbar styles */
@@ -77,30 +78,34 @@ body{
   justify-content: space-between;
   min-height: 180px;
   transition: all 0.3s ease-in-out;
+  position: relative;
+  padding-bottom:20px;
+  margin-bottom: 15pxs;
 }
 
 .topic-card h2 {
   margin-bottom: 0.5rem;
-  font-size: clamp(1rem, 2.5vw, 1.25rem); /* Responsive font size */
+  font-size: clamp(1rem, 2.5vw, 1.25rem); 
   color: #333;
 }
 
 .topic-card p {
   color: #666;
-  margin-bottom: 0.75rem; /* Optimized margin */
+  margin-bottom: 0.75rem; 
 }
 
 .card-buttons {
   display: flex;
   gap: 10px;
-  flex-direction: row; /* Change to row layout for buttons */
+  flex-direction: row; 
+  margin-bottom: 15px;
 }
 
 .preview-button, .start-button, .resume-button{
   flex: 1;
   padding: 0.75rem;
   border-radius: 20px;
-  font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
+  font-size: clamp(0.8rem, 2vw, 1rem); 
   background-color: #4CAF50;
   color: white;
   text-align: center;
@@ -109,6 +114,38 @@ body{
 .preview-button:hover, .start-button:hover, .resume-button:hover {
   background-color: #45a049;
 }
+
+.progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 94%;
+  padding: 0;
+  margin: 0;
+  margin-left: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #eee;
+  height: 5px;
+  border-radius: 0px;
+  overflow: hidden;
+  margin-top: 10px ;
+}
+
+.progress{
+  height:100%;
+  background-color: #4CAF50;
+  border-radius: 0;
+  transition: width 0.3s ease;
+}
+
+
+.progress-bar span {
+   display : none;
+}
+
 
 @media (max-width: 1200px) {
   .cards-container {

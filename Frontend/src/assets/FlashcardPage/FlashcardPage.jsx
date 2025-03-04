@@ -4,6 +4,7 @@ import Navbar from "../NavBar/Navbar.jsx";
 import { topics } from "../MainPage/MainPage.jsx";
 import { courses } from "../CoursePage/CoursePage.jsx";
 import "./FlashcardPage.css";
+import Footer from "../Footer/Footer.jsx";
 
 
 const flashcardsData = {
@@ -293,6 +294,7 @@ const shuffleArray = (array) => {
     };
   
     return (
+      
       <div className="flashcard-page">
         <Navbar />
         <div className="flashcard-container">
@@ -314,7 +316,11 @@ const shuffleArray = (array) => {
             <button onClick={handleNext} className="nav-button">→</button>
           </div>
         </div>
+        <Footer/>
+        
       </div>
+      
+      
     );
   }
   
