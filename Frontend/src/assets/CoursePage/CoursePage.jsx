@@ -6,6 +6,8 @@ import Navbar from "../NavBar/Navbar.jsx";
 import { topics } from "../MainPage/MainPage.jsx"; 
 import "./CoursePage.css";
 import LinkIcon from "../../images/LinkIcon.svg";
+import Footer from "../Footer/Footer.jsx";
+
 export const courses = null;
 
 const getTopics = async(courseId)=>{
@@ -118,8 +120,7 @@ function CoursePage() {
 
   const handleFlashcardClick = (subtopic) => {
     if (isAuthenticated) {
-      navigate(`/flashcards/${id}/${subtopic.name}`, {state:{subtopic}});  // Use just the name property
-      navigate(`/flashcards/${id}/${subtopic.name}`);  
+      navigate(`/flashcards/${id}/${subtopic.name}`, {state:{subtopic}}); 
     } else {
       navigate("/login");
     }

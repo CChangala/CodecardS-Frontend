@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
  
@@ -25,6 +24,17 @@ const getCourses = async()=>{
   return data;
 };
 
+const getProgress = async(userId) => {
+  const response = await fetch(`http://localhost:8080/totalprogress/ace8591e-3e01-4f52-a630-fdd0d620396f`);
+  if(!response.ok){
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  const data = await response.json();
+  return data;
+}
+
+
 function MainPage() {
   const navigate = useNavigate();
   const { isAuthenticated, username } = useContext(AuthContext);
@@ -33,30 +43,36 @@ function MainPage() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const location = useLocation();
+  const { userId } = "ace8591e-3e01-4f52-a630-fdd0d620396f"//location.state || {};
 
   useEffect(() => {
-    const fetchTopics = async () => {
+    async function fetchData() {
       try {
-        const topics = await getCourses();
-        setTopics(topics);
+        const [topicsData, progressData] = await Promise.all([
+          getCourses(),
+          getProgress(userId)
+        ]);
+        setTopics(topicsData);
+        const newstartedCoursesMap = progressData.reduce((acc, { courseId, percentage }) => {
+          acc[courseId] = { progress: percentage, started: true };
+          return acc;
+        }, {});
+        if(isAuthenticated){
+        setStartedCourses(newstartedCoursesMap);
+        }
+        else{
+          setStartedCourses({});
+        }
       } catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
       }
-    };
-    fetchTopics();
-    if (isAuthenticated && username) {
-      const savedStartedCourses = JSON.parse(localStorage.getItem(`${username}-started-courses`)) || {};
-      setStartedCourses(savedStartedCourses);
     }
-  }, [isAuthenticated, username]);
+    fetchData();
+  },[userId,isAuthenticated]);
 
-  useEffect(() => {
-    if (isAuthenticated && username) {
-      localStorage.setItem(`${username}-started-courses`, JSON.stringify(startedCourses));
-    }
-  }, [startedCourses, isAuthenticated, username]);
 
   const handlePreviewClick = (topic) => {
     if (!isAuthenticated) {
@@ -70,17 +86,13 @@ function MainPage() {
     if (!isAuthenticated) {
       navigate("/login");
     } else {
-      if (!startedCourses[topicId] || !startedCourses[topicId].started) {
-        const updatedStartedCourses = { 
-          ...startedCourses, 
-          [topicId]: { progress: 0, started: true } 
-        };
-        setStartedCourses(updatedStartedCourses);
-      }
-      
-      
+      const updatedStartedCourses = {
+        ...startedCourses,
+        [topicId]: { ...startedCourses[topicId], started: true }
+      };
+      setStartedCourses(updatedStartedCourses);
+    } 
       navigate(`/course/${topicId}`);
-    }
   };
 
   if (loading) {
@@ -118,10 +130,9 @@ function MainPage() {
 
               
             </div>
-            {startedCourses[topic.id] && (
-            {startedCourses[topic.id] && (
+            {startedCourses[topic.courseId] && (
               <div className="progress-container">
-              <MainPageProgressBar progress={startedCourses[topic.id]?.progress || 0} />
+              <MainPageProgressBar progress={startedCourses[topic.courseId].progress|| 0} />
             </div>
             )}
           
