@@ -2,14 +2,9 @@ import React, { useContext, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
- 
-
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
 import "./MainPage.css";
-
-  
-
 import Footer from "../Footer/Footer.jsx";
 
 export const topics = null;
