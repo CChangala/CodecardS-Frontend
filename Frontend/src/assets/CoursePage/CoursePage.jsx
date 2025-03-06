@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
 import Navbar from "../NavBar/Navbar.jsx";
@@ -22,39 +22,85 @@ const getTopics = async(courseId)=>{
     
 }
 
+const getCourseProgress = async (userId, courseId) => {
+  const response = await fetch(`http://localhost:8080/${userId}/started/${courseId}`);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  return await response.json();
+};
+
+const updateTopicProgress = async (courseId, topicId, userId, isCompleted) => {
+  const url = `http://localhost:8080/${courseId}/topics/${topicId}/progress?userId=${userId}&isCompleted=${isCompleted}`;
+  const response = await fetch(url, {
+    method: 'POST'
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  return await response.text();
+};
+
 function CoursePage() {
   const { id } = useParams();
   const { username } = useContext(AuthContext);
   const [progress, setProgress] = useState({});
   const [notes, setNotes] = useState({});
   const [activeSubtopic, setActiveSubtopic] = useState(null);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated,userId } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showNotesPopup, setShowNotesPopup] = useState(false);
-  const course = courses[id];
-  
-  
-  const currentTopic = topics.find(topic => topic.id === parseInt(id));
+  const [course, setCourse] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
-    setProgress(savedProgress[course.title] || {});
-    const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
-    setNotes(savedNotes[course.title] || {});
-  }, [id, username, course.title]);
+    async function fetchData() {
+      try{
+        const [courseData, progressData] = await Promise.all([
+          getTopics(id),
+          getCourseProgress(userId, id)
+        ]);
+        setCourse(courseData);
+        setProgress(progressData.topicsCompleted.reduce((acc, item) => ({
+          ...acc,
+          [item.topicId]: item.isCompleted  // Maps each topicId to its completion status
+        }), {}));
+      }
+      catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+      const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
+      setNotes(savedNotes[course.title] || {});
+    }
+    fetchData();
+  }, [course.title, id, userId, username]);
 
-  const handleCheckboxChange = (subtopic) => {
-    const updatedProgress = { ...progress, [subtopic]: !progress[subtopic] };
-    setProgress(updatedProgress);
-    
-    const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
-    savedProgress[course.title] = updatedProgress;
-    localStorage.setItem(username, JSON.stringify(savedProgress));
+  const handleCheckboxChange = async (topicId) => {
+    const newCompletionStatus = !progress[topicId];
+    try {
+      const newCompletionStatus = !progress[topicId];
+
+      setProgress(prev => ({ ...prev, [topicId]: newCompletionStatus }));
+
+  
+      await updateTopicProgress(id, topicId, userId, newCompletionStatus);
+    } catch (error) {
+      console.error("Failed to update topic progress:", error);
+      setProgress(prev => ({ ...prev, [topicId]: !newCompletionStatus }));
+    }
   };
-
+  
   const handleFlashcardClick = (subtopic) => {
     if (isAuthenticated) {
-      navigate(`/flashcards/${id}/${subtopic.name}`, {state:{subtopic}}); 
+      navigate(`/flashcards/${id}/${subtopic.name}`, {state:
+        {subtopic
+        }
+      }); 
     } else {
       navigate("/login");
     }
@@ -80,9 +126,18 @@ function CoursePage() {
 
   if (!course) return <p>Loading...</p>;
 
-  const completedCount = Object.values(progress).filter(Boolean).length;
-  const totalCount = course.subtopics.length;
-  const completionRate = (completedCount / totalCount) * 100;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+
+  const completedCount = Object.values(progress).filter(isCompleted => isCompleted).length;
+  const totalCount = course && course.topic ? course.topic.length : 0;
+  const completionRate = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <>
@@ -115,14 +170,14 @@ function CoursePage() {
             </tr>
           </thead>
           <tbody>
-            {course.subtopics.map((sub) => (
-              <tr key={sub.name} className="course-cells">
+            {course.topic.map((sub) => (
+              <tr key={sub.topicId} className="course-cells">
                 <td className="status-cell">
                   <label className="checkbox-container">
                     <input
                       type="checkbox"
-                      checked={progress[sub.name] || false}
-                      onChange={() => handleCheckboxChange(sub.name)}
+                      checked={progress[sub.topicId] || false}
+                      onChange={() => handleCheckboxChange(sub.topicId)}
                     />
                     <span className="checkmark"></span>
                   </label>

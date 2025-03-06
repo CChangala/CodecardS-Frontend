@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import Navbar from "../NavBar/Navbar.jsx";
-import { topics } from "../MainPage/MainPage.jsx";
-import { courses } from "../CoursePage/CoursePage.jsx";
 import "./FlashcardPage.css";
 import Footer from "../Footer/Footer.jsx";
 
@@ -38,9 +36,9 @@ const shuffleArray = (array) => {
           <Navbar />
           <div className="flashcard-container">
             <Link to={{
-              pathname: `/course/${subject}`,
-              state: { userId }  // Ensuring userId is passed back
-              }} className="back-button">← Back</Link>
+  pathname: `/course/${subject}`,
+  state: { userId } // This assumes userId is correctly retrieved from the state
+}}className="back-button">← Back</Link>
             <h2>No Flashcards Available</h2>
             <p>This topic doesn't have any flashcards yet.</p>
           </div>

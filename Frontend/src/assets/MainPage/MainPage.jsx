@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
-import ProgressBar from "../ProgressBar/ProgressBar.jsx";
+import "./MainPage.css";
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
 import "./MainPage.css";
@@ -20,7 +20,7 @@ const getCourses = async()=>{
 };
 
 const getProgress = async(userId) => {
-  const response = await fetch(`http://localhost:8080/totalprogress/ace8591e-3e01-4f52-a630-fdd0d620396f`);
+  const response = await fetch(`http://localhost:8080/totalprogress/${userId}`);
   if(!response.ok){
     const error = await response.json();
     throw new Error(error.error || response.statusText);
@@ -30,7 +30,7 @@ const getProgress = async(userId) => {
 }
 
 const startCourse = async (courseId, userId) => {
-  const url = `http://localhost:8080/${courseId}/start?userId=ace8591e-3e01-4f52-a630-fdd0d620396f`;
+  const url = `http://localhost:8080/${courseId}/start?userId=${userId}`;
 
   try {
       const response = await fetch(url, {
@@ -54,17 +54,29 @@ const startCourse = async (courseId, userId) => {
   }
 };
 
+function MainPageProgressBar({ progress }) {
+  return (
+    <div className="mainpage-progress-bar">
+      <div 
+        className="mainpage-progress" 
+        style={{ width: `${progress}%` }}
+      >
+        <span>{progress}%</span>
+      </div>
+    </div>
+  );
+}
+
 
 function MainPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, username } = useContext(AuthContext);
+  const { isAuthenticated, userId } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [startedCourses, setStartedCourses] = useState({});
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const location = useLocation();
-  const { userId } = "ace8591e-3e01-4f52-a630-fdd0d620396f"//location.state || {};
+  //const userId  = "ace8591e-3e01-4f52-a630-fdd0d620396f"//location.state || {};
 
   useEffect(() => {
     async function fetchData() {
@@ -75,7 +87,7 @@ function MainPage() {
         ]);
         setTopics(topicsData);
         const newstartedCoursesMap = progressData.reduce((acc, { courseId, percentage }) => {
-          acc[courseId] = { progress: percentage, started: true };
+          acc[courseId] = { progress: percentage, started: percentage >= 0 };
           return acc;
         }, {});
         if(isAuthenticated){
@@ -107,10 +119,18 @@ function MainPage() {
       navigate("/login");
     } 
     else{
+      try {
       await startCourse(topicId,userId);
+      setStartedCourses(prev => ({
+        ...prev,
+        [topicId]: { ...prev[topicId], started: true }
+      }));
+    } catch (error) {
+      console.error('Error starting course:', error);
     }
-      navigate(`/course/${topicId}`);
+    navigate(`/course/${topicId}`);
   };
+}
 
   if (loading) {
     return <div>Loading...</div>;
@@ -120,6 +140,7 @@ function MainPage() {
     return <div>Error: {error}</div>;
   }
 
+  console.log(startedCourses);
 
   return (
     <>
@@ -131,7 +152,7 @@ function MainPage() {
 
       <div className="cards-container">
         {topics.map((topic) => (
-          <div key={topic.id} className="topic-card">
+          <div key={topic.courseId} className="topic-card">
             <h2>{topic.title}</h2>
             <p>{topic.description}</p>
             <div className="card-buttons">
@@ -139,10 +160,10 @@ function MainPage() {
                 Preview
               </button>
               <button 
-                className={startedCourses[topic.id] ? "resume-button" : "start-button"}
-                onClick={() => handleCourseStart(topic.id)}
+                className={startedCourses[topic.courseId] ? "resume-button" : "start-button"}
+                onClick={() => handleCourseStart(topic.courseId)}
               >
-                {startedCourses[topic.id] ? "Resume" : "Start"}
+                {startedCourses[topic.courseId] ? "Resume" : "Start"}
               </button>
 
               
