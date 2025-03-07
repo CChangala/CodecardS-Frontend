@@ -79,32 +79,29 @@ function MainPage() {
   //const userId  = "ace8591e-3e01-4f52-a630-fdd0d620396f"//location.state || {};
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const [topicsData, progressData] = await Promise.all([
-          getCourses(),
-          getProgress(userId)
-        ]);
+        const topicsData = await getCourses();
         setTopics(topicsData);
-        const newstartedCoursesMap = progressData.reduce((acc, { courseId, percentage }) => {
-          acc[courseId] = { progress: percentage, started: percentage >= 0 };
-          return acc;
-        }, {});
-        if(isAuthenticated){
-        setStartedCourses(newstartedCoursesMap);
-        }
-        else{
-          setStartedCourses({});
+
+        if (isAuthenticated && userId) {
+          const progressData = await getProgress(userId);
+          const newStartedCoursesMap = progressData.reduce((acc, { courseId, percentage }) => {
+            acc[courseId] = { progress: percentage, started: percentage > 0 };
+            return acc;
+          }, {});
+          setStartedCourses(newStartedCoursesMap);
         }
       } catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
       }
-    }
-    fetchData();
-  },[userId,isAuthenticated]);
+    };
 
+    fetchData();
+  }, [userId, isAuthenticated]);
 
   const handlePreviewClick = (topic) => {
     if (!isAuthenticated) {

@@ -55,6 +55,7 @@ function CoursePage() {
   const [course, setCourse] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const[currentTopic,setCurrentTopic] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
