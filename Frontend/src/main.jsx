@@ -11,26 +11,25 @@ import FlashcardPage from './assets/FlashcardPage/FlashcardPage.jsx';
 
 export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
+  
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem('isAuthenticated') === 'true'
   );
 
-  const [username, setUsername] = useState(
-    localStorage.getItem('username') || ''
-  );
+
+  const [userId, setUserId] = 
+  useState(localStorage.getItem('userId') || '');
 
   useEffect(() => {
     localStorage.setItem('isAuthenticated', isAuthenticated);
+    localStorage.setItem('userId', userId);
     
-  }, [isAuthenticated]);
+  }, [isAuthenticated,userId]);
 
-  useEffect(() => {
-    localStorage.setItem('username', username);
-  }, [username]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated,username, 
-      setUsername }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated,userId, 
+      setUserId }}>
       {children}
     </AuthContext.Provider>
   );

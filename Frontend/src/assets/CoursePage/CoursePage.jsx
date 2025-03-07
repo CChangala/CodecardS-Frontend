@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
 import ProgressBar from "../ProgressBar/ProgressBar.jsx";
 import Navbar from "../NavBar/Navbar.jsx";
@@ -8,69 +8,39 @@ import "./CoursePage.css";
 import LinkIcon from "../../images/LinkIcon.svg";
 import Footer from "../Footer/Footer.jsx";
 
-export const courses = {
-  1: { 
-    title: "Python", 
-    subtopics: [
-      { name: "Basics", link: "https://www.geeksforgeeks.org/introduction-to-python/" },
-      { name: "Libraries", link: "https://www.geeksforgeeks.org/python-packages/" },
-      { name: "Numpy", link: "https://www.geeksforgeeks.org/python-numpy/" },
-      { name: "Pandas", link: "https://www.geeksforgeeks.org/python-pandas-dataframe/" },
-      { name: "Sci-kit Learn", link: "https://www.geeksforgeeks.org/learning-model-building-scikit-learn-python-machine-learning-library/" },
-      { name: "Matplotlib", link: "https://www.geeksforgeeks.org/python-introduction-matplotlib/" },
-      { name: "Seaborn", link: "https://www.geeksforgeeks.org/python-seaborn-tutorial/" },
-      { name: "Keras", link: "https://www.geeksforgeeks.org/python-keras/" }
-    ]
-  },
-  2: { 
-    title: "Java", 
-    subtopics: [
-      { name: "OOP Basics", link: "https://docs.oracle.com/javase/tutorial/java/concepts/index.html" },
-      { name: "Collections Framework", link: "https://docs.oracle.com/javase/tutorial/collections/index.html" }
-    ]
-  },
-  3: { 
-    title: "DSA", 
-    subtopics: [
-      { name: "Sorting Algorithms", link: "https://www.geeksforgeeks.org/sorting-algorithms/" },
-      { name: "Graph Algorithms", link: "https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/" }
-    ]
-  },
-  4: { 
-    title: "HTML/CSS", 
-    subtopics: [
-      { name: "HTML Basics", link: "https://www.w3schools.com/html/default.asp" },
-      { name: "CSS Fundamentals", link: "https://www.w3schools.com/css/default.asp" }
-    ]
-  },
-  5: { 
-    title: "JavaScript", 
-    subtopics: [
-      { name: "JS Basics", link: "https://www.w3schools.com/js/default.asp" },
-      { name: "DOM Manipulation", link: "https://www.w3schools.com/js/js_htmldom.asp" }
-    ]
-  },
-  6: { 
-    title: "React", 
-    subtopics: [
-      { name: "React Basics", link: "https://reactjs.org/tutorial/tutorial.html" },
-      { name: "Hooks", link: "https://reactjs.org/docs/hooks-intro.html" }
-    ]
-  },
-  7: { 
-    title: "Machine Learning", 
-    subtopics: [
-      { name: "ML Basics", link: "https://www.kaggle.com/learn/intro-to-machine-learning" },
-      { name: "Neural Networks", link: "https://www.kaggle.com/learn/deep-learning" }
-    ]
-  },
-  8: { 
-    title: "SQL", 
-    subtopics: [
-      { name: "SQL Basics", link: "https://www.w3schools.com/sql/default.asp" },
-      { name: "Advanced Queries", link: "https://www.w3schools.com/sql/sql_join.asp" }
-    ]
+export const courses = null;
+
+const getTopics = async(courseId)=>{
+  const response = await fetch(`http://localhost:8080/topic/${courseId}`)
+  if(!response.ok){
+    const error = await response.json();
+    throw new Error(error.error ||response.statusText);
   }
+    const data = await response.json();
+    console.log(data);
+    return data;
+    
+}
+
+const getCourseProgress = async (userId, courseId) => {
+  const response = await fetch(`http://localhost:8080/${userId}/started/${courseId}`);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  return await response.json();
+};
+
+const updateTopicProgress = async (courseId, topicId, userId, isCompleted) => {
+  const url = `http://localhost:8080/${courseId}/topics/${topicId}/progress?userId=${userId}&isCompleted=${isCompleted}`;
+  const response = await fetch(url, {
+    method: 'POST'
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  return await response.text();
 };
 
 function CoursePage() {
@@ -79,33 +49,59 @@ function CoursePage() {
   const [progress, setProgress] = useState({});
   const [notes, setNotes] = useState({});
   const [activeSubtopic, setActiveSubtopic] = useState(null);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated,userId } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showNotesPopup, setShowNotesPopup] = useState(false);
-  const course = courses[id];
-  
-  
-  const currentTopic = topics.find(topic => topic.id === parseInt(id));
+  const [course, setCourse] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const[currentTopic,setCurrentTopic] = useState(null);
 
   useEffect(() => {
-    const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
-    setProgress(savedProgress[course.title] || {});
-    const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
-    setNotes(savedNotes[course.title] || {});
-  }, [id, username, course.title]);
+    async function fetchData() {
+      try{
+        const [courseData, progressData] = await Promise.all([
+          getTopics(id),
+          getCourseProgress(userId, id)
+        ]);
+        setCourse(courseData);
+        setProgress(progressData.topicsCompleted.reduce((acc, item) => ({
+          ...acc,
+          [item.topicId]: item.isCompleted  // Maps each topicId to its completion status
+        }), {}));
+      }
+      catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+      const savedNotes = JSON.parse(localStorage.getItem(`${username}-notes`)) || {};
+      setNotes(savedNotes[course.title] || {});
+    }
+    fetchData();
+  }, [course.title, id, userId, username]);
 
-  const handleCheckboxChange = (subtopic) => {
-    const updatedProgress = { ...progress, [subtopic]: !progress[subtopic] };
-    setProgress(updatedProgress);
-    
-    const savedProgress = JSON.parse(localStorage.getItem(username)) || {};
-    savedProgress[course.title] = updatedProgress;
-    localStorage.setItem(username, JSON.stringify(savedProgress));
+  const handleCheckboxChange = async (topicId) => {
+    const newCompletionStatus = !progress[topicId];
+    try {
+      const newCompletionStatus = !progress[topicId];
+
+      setProgress(prev => ({ ...prev, [topicId]: newCompletionStatus }));
+
+  
+      await updateTopicProgress(id, topicId, userId, newCompletionStatus);
+    } catch (error) {
+      console.error("Failed to update topic progress:", error);
+      setProgress(prev => ({ ...prev, [topicId]: !newCompletionStatus }));
+    }
   };
-
+  
   const handleFlashcardClick = (subtopic) => {
     if (isAuthenticated) {
-      navigate(`/flashcards/${id}/${subtopic.name}`);  
+      navigate(`/flashcards/${id}/${subtopic.name}`, {state:
+        {subtopic
+        }
+      }); 
     } else {
       navigate("/login");
     }
@@ -131,9 +127,18 @@ function CoursePage() {
 
   if (!course) return <p>Loading...</p>;
 
-  const completedCount = Object.values(progress).filter(Boolean).length;
-  const totalCount = course.subtopics.length;
-  const completionRate = (completedCount / totalCount) * 100;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+
+  const completedCount = Object.values(progress).filter(isCompleted => isCompleted).length;
+  const totalCount = course && course.topic ? course.topic.length : 0;
+  const completionRate = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <>
@@ -166,14 +171,14 @@ function CoursePage() {
             </tr>
           </thead>
           <tbody>
-            {course.subtopics.map((sub) => (
-              <tr key={sub.name} className="course-cells">
+            {course.topic.map((sub) => (
+              <tr key={sub.topicId} className="course-cells">
                 <td className="status-cell">
                   <label className="checkbox-container">
                     <input
                       type="checkbox"
-                      checked={progress[sub.name] || false}
-                      onChange={() => handleCheckboxChange(sub.name)}
+                      checked={progress[sub.topicId] || false}
+                      onChange={() => handleCheckboxChange(sub.topicId)}
                     />
                     <span className="checkmark"></span>
                   </label>

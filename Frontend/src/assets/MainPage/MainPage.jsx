@@ -1,75 +1,59 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../main.jsx";
-import ProgressBar from "../ProgressBar/ProgressBar.jsx";
- 
-
+import "./MainPage.css";
 import Navbar from "../NavBar/Navbar.jsx";
 import Preview from "../Preview/Preview.jsx";
 import "./MainPage.css";
-
-  
-
 import Footer from "../Footer/Footer.jsx";
 
-export const topics = [
-  {
-    id: 1,
-    title: "Python",
-    description: "Python is a high-level programming language.",
-    details: "Python is used in web development, automation, data science, AI, and more. It is known for its simplicity and readability.",
-    benefits: "You will learn to write clean code, build applications, and automate tasks efficiently."
-  },
-  {
-    id: 2,
-    title: "Java",
-    description: "An object-oriented programming language.",
-    details: "Java is widely used in backend development, mobile apps, and enterprise software due to its portability and scalability.",
-    benefits: "By completing this course, you'll be able to build scalable applications and understand core OOP concepts."
-  },
-  {
-    id: 3,
-    title: "DSA",
-    description: "Data Structures and Algorithms.",
-    details: "DSA is essential for problem-solving in programming and is widely used in competitive coding and technical interviews.",
-    benefits: "You will develop strong algorithmic thinking and problem-solving skills to crack coding interviews."
-  },
-  {
-    id: 4,
-    title: "HTML/CSS",
-    description: "Frontend technologies for web development.",
-    details: "HTML structures web pages, while CSS styles them to make beautiful, responsive websites.",
-    benefits: "You will gain hands-on experience in creating responsive and user-friendly websites."
-  },
-  {
-    id: 5,
-    title: "JavaScript",
-    description: "The language of the web.",
-    details: "JavaScript is used for interactive web development, powering dynamic front-end applications.",
-    benefits: "You will be able to build interactive websites and understand core JavaScript concepts."
-  },
-  {
-    id: 6,
-    title: "React",
-    description: "A popular frontend JavaScript library.",
-    details: "React is used to build dynamic, component-based user interfaces efficiently.",
-    benefits: "You'll gain skills in React hooks, state management, and creating interactive web applications."
-  },
-  {
-    id: 7,
-    title: "Machine Learning",
-    description: "AI and data-driven learning models.",
-    details: "Machine Learning enables computers to learn from data and make predictions.",
-    benefits: "By the end of this course, you'll understand ML models, train datasets, and build AI applications."
-  },
-  {
-    id: 8,
-    title: "SQL",
-    description: "Structured Query Language for databases.",
-    details: "SQL is used to store, retrieve, and manage data in relational databases.",
-    benefits: "You will master querying, data manipulation, and database management."
+export const topics = null;
+
+const getCourses = async()=>{
+  const response = await fetch("http://localhost:8080/courses");
+  if (!response.ok) { 
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
   }
-];
+  const data = await response.json();
+  return data;
+};
+
+const getProgress = async(userId) => {
+  const response = await fetch(`http://localhost:8080/totalprogress/${userId}`);
+  if(!response.ok){
+    const error = await response.json();
+    throw new Error(error.error || response.statusText);
+  }
+  const data = await response.json();
+  return data;
+}
+
+const startCourse = async (courseId, userId) => {
+  const url = `http://localhost:8080/${courseId}/start?userId=${userId}`;
+
+  try {
+      const response = await fetch(url, {
+          method: 'POST', // Specifies the method
+          headers: {
+              'Content-Type': 'application/json' // Set the headers appropriately if needed
+          },
+          // If you need to send a JSON body, uncomment and modify the line below
+          // body: JSON.stringify({ key: 'value' })
+      });
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.text(); // Assuming the server responds with JSON-formatted data
+      console.log('Success:', data);
+      return data;
+  } catch (error) {
+      console.error('Error:', error);
+  }
+};
+
 function MainPageProgressBar({ progress }) {
   return (
     <div className="mainpage-progress-bar">
@@ -83,35 +67,41 @@ function MainPageProgressBar({ progress }) {
   );
 }
 
+
 function MainPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, username } = useContext(AuthContext);
+  const { isAuthenticated, userId } = useContext(AuthContext);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  
-
-  const [startedCourses, setStartedCourses] = useState({
-    1: { progress: 25, started: true },  
-    2: { progress: 50, started: true },  
-    3: { progress: 75, started: true },  
-    4: { progress: 0, started: false },  
-    5: { progress: 10, started: true },   
-    6: { progress: 40, started: true },   
-    7: { progress: 5, started: true },    
-    8: { progress: 0, started: false }    
-  });
+  const [startedCourses, setStartedCourses] = useState({});
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  //const userId  = "ace8591e-3e01-4f52-a630-fdd0d620396f"//location.state || {};
 
   useEffect(() => {
-    if (isAuthenticated && username) {
-      const savedStartedCourses = JSON.parse(localStorage.getItem(`${username}-started-courses`)) || {};
-      setStartedCourses(savedStartedCourses);
-    }
-  }, [isAuthenticated, username]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const topicsData = await getCourses();
+        setTopics(topicsData);
 
-  useEffect(() => {
-    if (isAuthenticated && username) {
-      localStorage.setItem(`${username}-started-courses`, JSON.stringify(startedCourses));
-    }
-  }, [startedCourses, isAuthenticated, username]);
+        if (isAuthenticated && userId) {
+          const progressData = await getProgress(userId);
+          const newStartedCoursesMap = progressData.reduce((acc, { courseId, percentage }) => {
+            acc[courseId] = { progress: percentage, started: percentage > 0 };
+            return acc;
+          }, {});
+          setStartedCourses(newStartedCoursesMap);
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId, isAuthenticated]);
 
   const handlePreviewClick = (topic) => {
     if (!isAuthenticated) {
@@ -121,23 +111,33 @@ function MainPage() {
     }
   };
 
-  const handleCourseStart = (topicId) => {
+  const handleCourseStart = async(topicId) => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else {
-      if (!startedCourses[topicId] || !startedCourses[topicId].started) {
-        const updatedStartedCourses = { 
-          ...startedCourses, 
-          [topicId]: { progress: 0, started: true } 
-        };
-        setStartedCourses(updatedStartedCourses);
-      }
-      
-      
-      navigate(`/course/${topicId}`);
+    } 
+    else{
+      try {
+      await startCourse(topicId,userId);
+      setStartedCourses(prev => ({
+        ...prev,
+        [topicId]: { ...prev[topicId], started: true }
+      }));
+    } catch (error) {
+      console.error('Error starting course:', error);
     }
+    navigate(`/course/${topicId}`);
   };
+}
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  console.log(startedCourses);
 
   return (
     <>
@@ -149,7 +149,7 @@ function MainPage() {
 
       <div className="cards-container">
         {topics.map((topic) => (
-          <div key={topic.id} className="topic-card">
+          <div key={topic.courseId} className="topic-card">
             <h2>{topic.title}</h2>
             <p>{topic.description}</p>
             <div className="card-buttons">
@@ -157,17 +157,17 @@ function MainPage() {
                 Preview
               </button>
               <button 
-                className={startedCourses[topic.id] ? "resume-button" : "start-button"}
-                onClick={() => handleCourseStart(topic.id)}
+                className={startedCourses[topic.courseId] ? "resume-button" : "start-button"}
+                onClick={() => handleCourseStart(topic.courseId)}
               >
-                {startedCourses[topic.id] ? "Resume" : "Start"}
+                {startedCourses[topic.courseId] ? "Resume" : "Start"}
               </button>
 
               
             </div>
-            {startedCourses[topic.id] && (
+            {startedCourses[topic.courseId] && (
               <div className="progress-container">
-              <MainPageProgressBar progress={startedCourses[topic.id]?.progress || 0} />
+              <MainPageProgressBar progress={startedCourses[topic.courseId].progress|| 0} />
             </div>
             )}
           
