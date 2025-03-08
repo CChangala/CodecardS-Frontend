@@ -68,6 +68,31 @@ function LoginPage() {
             return;
         }
 
+        //can do it later.
+        if (isForgotPassword) {
+            // Handle Forgot Password
+            const userIndex = users.findIndex(user => user.email === email);
+            if (userIndex === -1) {
+                setError("Email not found.");
+                return;
+            }
+            if (!password || !confirmPassword) {
+                setError("Please enter and confirm your new password.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                setError("Passwords do not match!");
+                return;
+            }
+
+            users[userIndex].password = password;
+            localStorage.setItem("users", JSON.stringify(users));
+            setSuccessMessage("Password reset successful! You can now log in.");
+            setIsForgotPassword(false);
+            return;
+        }
+
         if (isLogin) {
             // Login validation
             const user = await LoginCall(email,password);
@@ -182,11 +207,7 @@ function LoginPage() {
                         </p>
                     )}
 
-                    {isLogin && (
-                        <p className={styles.forgotPassword} onClick={() => setIsForgotPassword(true)}>
-                            Forgot Password?
-                        </p>
-                    )}
+                    
 
                     {isForgotPassword && (
                         <p className={styles.backToLogin} onClick={() => setIsForgotPassword(false)}>
