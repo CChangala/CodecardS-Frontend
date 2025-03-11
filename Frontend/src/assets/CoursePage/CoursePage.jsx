@@ -167,7 +167,6 @@ function CoursePage() {
               <th>Topics</th>
               <th>Links</th>
               <th>Flashcards</th>
-              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -192,13 +191,6 @@ function CoursePage() {
   className="flashcard-button" 
   onClick={() => handleFlashcardClick(sub)}  
 ></button>
-                </td>
-                <td className="notes-cell">
-                  <button 
-                    className="notes-button" 
-                    onClick={() => handleNotesClick(sub.name)}
-                    aria-label={`Notes for ${sub.name}`}
-                  >+</button>
                 </td>
               </tr>
             ))}
